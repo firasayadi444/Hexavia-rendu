@@ -6,7 +6,11 @@ Deux étapes sont disponibles : analyser un CSV et évaluer manuellement les id�
 
 Le fichier fourni donne **40 idées**, **8 idées à compléter**, **7 budgets inconnus ou absents**. Un budget déclaré à zéro est conservé à zéro. Les contenus identiques avec des identifiants différents restent deux idées.
 
-L'interface utilise Motion via le paquet `framer-motion` : transitions de 200 ms pour les messages et l'aperçu, retour discret à l'appui sur le bouton. `LazyMotion` limite les fonctionnalités chargées ; le tableau s'anime en un bloc. `useReducedMotion` désactive ces mouvements lorsque l'utilisateur demande moins d'animations. Le paquet `motion` n'était pas accessible sur le registre npm dans cet environnement ; le paquet officiel `framer-motion` était disponible dans le cache local.
+L'interface utilise Motion via le paquet `framer-motion` : transitions de 200 ms pour les messages et l'aperçu, retour discret à l'appui sur le bouton. `LazyMotion` limite les fonctionnalités chargées ; le tableau s'anime en un bloc. `useReducedMotion` désactive ces mouvements lorsque l'utilisateur demande moins d'animations.
+
+## Développement du frontend
+
+Codex a été utilisé pour aider à construire les composants React, les styles et les animations du frontend. Les choix d’interface ont été affinés progressivement : aperçu CSV, panneau latéral d’évaluation, repères de notation et statuts de validation. La vérification visuelle et des interactions au clavier reste à effectuer dans un navigateur.
 
 ## Lancer l'outil
 
@@ -32,7 +36,7 @@ npm run build
 npm start
 ```
 
-La compilation utilise Webpack pour conserver un chemin de vérification simple dans cet environnement. Aucun outil d'installation spécifique au cache local n'est nécessaire pour utiliser le dépôt avec un accès npm normal.
+La commande de compilation utilise Webpack.
 
 ## Comprendre le code dans l'ordre
 
