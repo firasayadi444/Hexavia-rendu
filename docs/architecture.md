@@ -1,51 +1,47 @@
-# Architecture — import et évaluation manuelle
+# Architecture
 
-Une application Next.js contient le rendu React et les actions serveur. Le module métier ne connaît ni les composants React, ni HTTP, ni Supabase.
+Une application Next.js. Le serveur ne fait que deux choses : lire le fichier importé et demander une première note à l'IA. Tout le travail de la consultante vit ensuite dans son navigateur.
 
 ```text
-Navigateur
-  import-form.tsx : choix du fichier et aperçu
-       |
-       | formulaire multipart
-       v
-Serveur Next.js
-  actions.ts : frontière du formulaire, erreurs lisibles
-       |
-       v
-Module ideas
-  preview-import.ts : fichier -> résultat d'analyse
-  import-csv.ts     : texte CSV -> idées validées
-  idea.ts           : modèle partagé
-       |
-       | résultat sérialisable
-       v
-Navigateur : tableau et informations à compléter
+Navigateur                                   Serveur Next.js
+----------                                   ---------------
+import-form.tsx    -- fichier CSV -->        actions.ts (action serveur)
+                                               modules/ideas : CSV -> idées validées
+                                               modules/ai    : idées sans nom -> notes proposées
+workspace-app.tsx  <-- idées + propositions --
+  use-workspace.ts : lit et écrit localStorage
+  modules/workspace : notes, décisions, shortlist
+  modules/duplicates, ideas/filter, shortlist : calculs à l'affichage
+  components/ : idées, doublons, shortlist
 ```
 
-## Pourquoi ces séparations ?
+## Les modules métier (`src/modules`)
 
-La lecture CSV se teste sans navigateur et sans base. Le formulaire peut évoluer sans modifier les règles d'import. La future persistance pourra être appelée côté serveur après validation, sans réécrire l'analyse CSV.
+Aucun ne connaît React, Next.js ou le navigateur : ils se testent avec `node --test`.
 
-Les animations Motion restent dans les composants clients d'import et d'évaluation. `LazyMotion` et `domAnimation` fournissent les transitions des blocs et du bouton ; aucune animation n'est créée pour chaque ligne d'idée. Les préférences de réduction des mouvements sont respectées et le formulaire initial reste visible sans animation d'entrée.
+| Module | Rôle |
+| --- | --- |
+| `ideas/import-csv.ts` | Lit le CSV : guillemets, dates françaises, budgets saisis librement, champs obligatoires. |
+| `ideas/filter.ts` | Filtres, recherche sans accents, tris. |
+| `evaluations/` | Grille à quatre critères, repères, moyenne à poids égaux, validation d'une note. |
+| `ai/` | `simulate.ts` propose quatre notes justifiées par des règles ; `provider.ts` est le seul point où brancher un vrai modèle. |
+| `duplicates/detect.ts` | Rapproche les idées par leurs mots (titre compté double, mots rares pondérés). |
+| `shortlist/shortlist.ts` | Classement, suggestion des mieux notées, export CSV pour Excel. |
+| `workspace/workspace.ts` | L'état de travail : création, relecture validée, décisions. |
 
-## Évaluation manuelle
+## Pourquoi le navigateur plutôt qu'une base
 
-`ideas-preview.tsx` conserve les évaluations dans l'état React de la page. Chaque idée s'ouvre dans `evaluation-panel.tsx`, une modale latérale Radix Dialog avec des icônes Lucide et une entrée Motion. L'état du formulaire reste un brouillon jusqu'à sa validation.
+Une seule consultante dépouille un challenge, sur son poste. Sans base, il n'y a ni compte à créer, ni données personnelles conservées sur un serveur, ni secret à déployer. Le prix : le travail ne suit pas la consultante sur un autre poste et ne se partage pas. `modules/workspace` isole cet état pour que le passage à Supabase ne change que `use-workspace.ts`.
 
-La grille, le calcul de moyenne et les schémas Zod vivent dans `modules/evaluations`. L'action `confirmSessionEvaluation` revérifie la saisie côté serveur et retourne un résultat horodaté. Elle ne stocke rien. Les champs supplémentaires, notes partielles, décimales et hors limites sont refusés.
+Ce qui est relu depuis `localStorage` est validé par Zod comme une entrée externe : un contenu abîmé ou d'une ancienne version est ignoré, l'application repart de l'import.
 
-Chaque analyse CSV reçoit un identifiant d'aperçu distinct : un nouvel import, même avec le même nom de fichier et les mêmes identifiants d'idées, crée une nouvelle session d'évaluation. Les statuts de l'interface parlent de validation dans la page, jamais de sauvegarde durable.
+## L'IA
 
-L'identité de l'idée est contrôlée syntaxiquement à cette étape. Lors de l'ajout de la base, il faudra également vérifier son existence et l'autorisation de l'utilisateur dans le challenge avant toute écriture.
+`actions.ts` appelle `proposeEvaluations` juste après l'import. L'IA ne reçoit que l'identifiant, le titre, la description, les bénéfices, le thème et le budget. `readAiSettings` lit `AI_API_KEY`, `AI_MODEL` et `STRATEGIC_PRIORITIES` côté serveur. En V1 la réponse est toujours simulée, clé présente ou non ; chaque proposition porte `source: 'simulation'` et l'interface le dit.
 
-## Ce qui est effectivement présent
+## Limites connues
 
-Les requêtes sont indépendantes : aucune donnée métier n'est conservée entre deux requêtes dans le processus serveur. Il n'existe encore ni base, ni authentification, ni worker, ni cache distribué. Le résultat reste dans la page ouverte et ne constitue pas un enregistrement durable.
-
-Les limites de taille sont vérifiées côté serveur. Next.js limite aussi le corps des actions à 3 Mo, afin de transporter un fichier de 2 Mo avec les métadonnées du formulaire. React affiche les données comme du texte.
-
-## Évolution prévue, à implémenter séparément
-
-Supabase/PostgreSQL conservera les idées. L'import devra alors être transactionnel, lié à un challenge et autorisé pour l'utilisateur connecté. La contrainte d'unicité sera portée par la base, et non par la mémoire d'une instance.
-
-L'application pourra recevoir plus de CPU/RAM ou plusieurs instances derrière un répartiteur. La base et les connexions devront être dimensionnées en parallèle. Aucun test de charge n'a encore mesuré une capacité de production.
+- Pas d'authentification : l'URL est ouverte, mais aucune donnée n'y est stockée.
+- Détection des doublons lexicale : deux idées identiques sur le fond mais sans mot commun lui échappent. Le seuil est réglé sur l'export Hexavia.
+- Le parcours au clavier et au lecteur d'écran n'a pas été vérifié de bout en bout.
+- Aucun test de charge ; la limite de 1 000 idées est une garde, pas une capacité mesurée.

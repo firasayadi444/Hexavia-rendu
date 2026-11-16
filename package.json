@@ -10,7 +10,7 @@
     "dev": "next dev --hostname 127.0.0.1",
     "build": "next build --webpack",
     "start": "next start --hostname 127.0.0.1",
-    "test": "node --import=tsx --test --test-isolation=none tests/*.test.ts",
+    "test": "node --import=tsx --test tests/*.test.ts",
     "check": "tsc --noEmit"
   },
   "dependencies": {

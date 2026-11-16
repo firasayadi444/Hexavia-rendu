@@ -10,7 +10,7 @@ const row = 'IDEA-001;2026-10-03;Julie;Marchand;Maintenance;Lyon;Énergie;Capteu
 const fixture = (content = row) => `${headers}\n${content}`;
 
 test('le vrai export fournit 40 idées, sans perte de lignes ni de caractères', async () => {
-  const csv = await readFile(new URL('../data/idees_hexavia.csv', import.meta.url), 'utf8');
+  const csv = await readFile(new URL('../public/exemple-idees-hexavia.csv', import.meta.url), 'utf8');
   const ideas = importCsv(csv);
   assert.equal(ideas.length, 40);
   assert.equal(ideas[0].firstName, 'Julie');
@@ -110,10 +110,18 @@ test('le service rejette un fichier vide, mauvais format, trop grand ou non UTF-
 });
 
 test('l’action serveur traite un formulaire sans fichier, invalide et valide', async () => {
-  const empty = await analyzeCsv({ status: 'idle' }, new FormData());
+  const empty = await analyzeCsv(new FormData());
   assert.equal(empty.status, 'error');
   const invalid = new FormData(); invalid.set('csv', new File(['bad csv'], 'bad.csv'));
-  assert.equal((await analyzeCsv({ status: 'idle' }, invalid)).status, 'error');
+  const rejected = await analyzeCsv(invalid);
+  assert.equal(rejected.status, 'error');
+  if (rejected.status === 'error') assert.match(rejected.message, /CSV invalide/);
   const valid = new FormData(); valid.set('csv', new File([fixture()], 'valid.csv'));
-  assert.equal((await analyzeCsv({ status: 'idle' }, valid)).status, 'success');
+  const accepted = await analyzeCsv(valid);
+  assert.equal(accepted.status, 'success');
+  if (accepted.status === 'success') {
+    assert.equal(accepted.ideas.length, 1);
+    assert.equal(accepted.proposals.length, 1);
+    assert.equal(accepted.proposals[0].ideaId, 'IDEA-001');
+  }
 });

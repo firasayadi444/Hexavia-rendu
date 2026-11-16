@@ -1,4 +1,4 @@
-name: Vérification de l'import
+name: Tests et compilation
 on: [push, pull_request]
 permissions:
   contents: read
@@ -13,5 +13,6 @@ jobs:
           cache: npm
           cache-dependency-path: package-lock.json
       - run: npm ci
+      - run: npm run check
       - run: npm test
       - run: npm run build

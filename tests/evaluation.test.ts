@@ -2,7 +2,6 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { averageScore, evaluationSchema, scoresSchema } from '../src/modules/evaluations/evaluation';
 import { validateEvaluation } from '../src/modules/evaluations/validate-evaluation';
-import { confirmSessionEvaluation } from '../src/app/evaluation-actions';
 
 const valid = { ideaId: 'IDEA-001', scores: { impact: 4, feasibility: 3, alignment: 2, innovation: 5 }, comment: 'Pilote à cadrer.' };
 
@@ -58,11 +57,4 @@ test('la validation produit un résultat horodaté sans modifier la saisie', () 
     assert.ok(Date.parse(result.evaluation.validatedAt) >= before);
   }
   assert.deepEqual(valid, copy);
-});
-
-test('la frontière serveur valide aussi les appels qui contournent le formulaire', async () => {
-  assert.equal((await confirmSessionEvaluation(valid)).success, true);
-  const rejected = await confirmSessionEvaluation({ ...valid, scores: { ...valid.scores, impact: 99 } });
-  assert.equal(rejected.success, false);
-  if (!rejected.success) assert.match(rejected.message, /quatre notes/);
 });
