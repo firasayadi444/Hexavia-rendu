@@ -4,7 +4,7 @@
 
 **Périmètre :** dépôt local fourni, fichier `idees_hexavia.csv`, consignes du cas pratique et état du projet au moment de l’évaluation.
 
-**Déploiement :** non réalisé, conformément à la décision de le faire ultérieurement.
+**Déploiement :** URL Vercel communiquée : <https://hexavia-rendu.vercel.app/>. Son accessibilité n’a pas pu être vérifiée depuis l’environnement de préparation.
 
 ## Synthèse
 
@@ -21,7 +21,7 @@ Le rendu est avancé pour une démonstration locale. Il n’est pas encore prêt
 | Construire avec l’IA | Réalisé avec simulation | Les propositions sont simulées et justifiées ; elles ne sont pas validées automatiquement. Le contenu des idées est transmis sans le nom des auteurs. Aucun fournisseur de modèle réel n’est branché. |
 | Fiabiliser | Vérifié | `npm run check`, `npm test` (61 tests) et `npm run build` passent dans l’environnement courant. |
 | Soigner l’interface | Implémenté, revue manuelle à confirmer | Les écrans couvrent les étapes métier et les captures locales sont présentes dans `docs/captures/`. Une nouvelle vérification clavier, mobile et lecteur d’écran reste à documenter si elle a été réalisée. |
-| Livrer | Version locale disponible | L’application peut être lancée localement. Les données restent dans le navigateur ; aucun déploiement public n’a été effectué. La mise en ligne est reportée. |
+| Livrer | URL communiquée | L’application a une URL Vercel fournie par le porteur du projet. Les données restent dans le navigateur ; l’accès public au lien n’a pas pu être vérifié depuis cet environnement. |
 | Restituer | À finaliser | README et documentation d’architecture existent. Les prompts réels et les horaires ne doivent être renseignés que par l’auteur ; la rubrique de vérification du parcours doit également refléter des essais réellement effectués. |
 
 ## Fonctionnalités constatées dans le dépôt
@@ -49,8 +49,8 @@ Le fichier `Rapport_evaluation_Hexavia_INSKIP.pdf` décrit un état antérieur d
 
 1. Compléter le README avec les seuls prompts et horaires que l’auteur peut confirmer.
 2. Refaire une revue manuelle du parcours et des captures avant la présentation.
-3. Traiter le déploiement, l’authentification et une éventuelle persistance serveur dans l’étape ultérieure prévue.
+3. Traiter l’authentification et une éventuelle persistance serveur dans l’étape ultérieure prévue.
 
 ## Conclusion
 
-Le socle fonctionnel local est substantiel et le typage, les 61 tests et la compilation de production sont validés. Le rendu doit être présenté comme une V1 locale avec IA simulée et sauvegarde navigateur. La publication en ligne reste à réaliser avant de revendiquer une livraison publique complète.
+Le socle fonctionnel, le typage, les 61 tests et la compilation de production sont validés. Le rendu correspond à une V1 avec IA simulée et sauvegarde navigateur. Une URL Vercel a été communiquée ; sa disponibilité et le parcours en ligne restent à vérifier avant de revendiquer une livraison publique complète.

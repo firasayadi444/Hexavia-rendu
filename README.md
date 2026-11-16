@@ -2,7 +2,7 @@
 
 ## Aperçu
 
-**Application en ligne (Vercel) :** `Lien à ajouter après le déploiement`
+**Application en ligne (Vercel) :** [https://hexavia-rendu.vercel.app/](https://hexavia-rendu.vercel.app/)
 
 | Les idées, filtrables | L'IA propose, la consultante corrige | Le document pour le jury |
 | --- | --- | --- |
